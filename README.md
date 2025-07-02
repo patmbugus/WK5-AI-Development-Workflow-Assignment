@@ -1,6 +1,6 @@
 # Hospital Readmission Risk Prediction AI System
 
-## 1. Problem Scope (5 points)
+## 1. Problem Scope
 
 ### Problem Definition
 Develop an AI system to predict the likelihood of patient readmission within 30 days of discharge to enable proactive interventions, reduce healthcare costs, and improve patient outcomes.
@@ -17,7 +17,7 @@ Develop an AI system to predict the likelihood of patient readmission within 30 
 - **IT Department**: System integration and maintenance
 - **Regulatory Bodies**: Ensuring compliance with healthcare standards
 
-## 2. Data Strategy (10 points)
+## 2. Data Strategy
 
 ### Data Sources
 - **Electronic Health Records (EHRs)**
@@ -85,7 +85,7 @@ Develop an AI system to predict the likelihood of patient readmission within 30 
    - Laboratory value trajectories
    - Medication adherence patterns
 
-## 3. Model Development (10 points)
+## 3. Model Development
 
 ### Model Selection: Gradient Boosting (XGBoost)
 
@@ -116,7 +116,7 @@ Readmit          45      105
 #### Clinical Interpretation
 The model shows strong overall performance with high specificity (low false positive rate), which is crucial for resource allocation. The moderate recall suggests some high-risk patients may be missed, requiring clinical review of threshold settings.
 
-## 4. Deployment (10 points)
+## 4. Deployment
 
 ### Integration Steps
 
@@ -168,7 +168,7 @@ The model shows strong overall performance with high specificity (low false posi
 - **Workstation Controls**: Secured access to systems displaying patient data
 - **Media Controls**: Secure handling of any physical storage media
 
-## 5. Optimization: Addressing Overfitting (5 points)
+## 5. Optimization: Addressing Overfitting 
 
 ### Method: Regularized Cross-Validation with Early Stopping
 
@@ -196,9 +196,9 @@ The model shows strong overall performance with high specificity (low false posi
 
 ---
 
-# Part 3: Critical Thinking (20 points)
+# Part 3: Critical Thinking
 
-## 1. Ethics & Bias (10 points)
+## 1. Ethics & Bias 
 
 ### Impact of Biased Training Data on Patient Outcomes
 
@@ -234,7 +234,7 @@ Biased training data can create systematic disparities in healthcare delivery th
    - Regular audits of model performance across demographic groups
    - Feedback loops to retrain models when bias drift is detected
 
-## 2. Trade-offs (10 points)
+## 2. Trade-offs
 
 ### Model Interpretability vs. Accuracy Trade-off
 
