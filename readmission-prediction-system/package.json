@@ -8,13 +8,22 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^5.0.3"
+    "web-vitals": "^5.0.3",
+    "axios": "^1.6.0",
+    "react-router-dom": "^6.8.0",
+    "jwt-decode": "^4.0.0",
+    "react-hook-form": "^7.48.0",
+    "recharts": "^2.8.0",
+    "date-fns": "^2.30.0",
+    "react-query": "^3.39.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev": "concurrently \"npm run start\" \"npm run server\"",
+    "server": "node backend/server.js"
   },
   "eslintConfig": {
     "extends": [
@@ -37,6 +46,8 @@
   "devDependencies": {
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.4"
-  }
+    "tailwindcss": "^3.4.4",
+    "concurrently": "^8.2.0"
+  },
+  "proxy": "http://localhost:5000"
 }

@@ -1,96 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, Clock, User, Activity, FileText, Settings, Shield } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, User, Activity, FileText, Settings, Shield, LogOut } from 'lucide-react';
+import apiService from './services/apiService';
 
-const ReadmissionPredictionSystem = () => {
+const ReadmissionPredictionSystem = ({ currentUser, onLogout }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [systemMetrics, setSystemMetrics] = useState({
-    totalPredictions: 1247,
-    highRiskPatients: 186,
-    accuracy: 89.3,
-    precision: 76.2,
-    recall: 68.9,
-    f1Score: 72.3
+    totalPredictions: 0,
+    highRiskPatients: 0,
+    accuracy: 0,
+    precision: 0,
+    recall: 0,
+    f1Score: 0
   });
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Realistic sample patient data with typical healthcare complexity
-  const samplePatients = [
-    {
-      id: 'P001',
-      name: 'Patient A',
-      age: 67,
-      gender: 'Female',
-      admissionDate: '2024-12-15',
-      dischargeDate: '2024-12-20',
-      primaryDiagnosis: 'Heart Failure with Reduced Ejection Fraction',
-      comorbidities: ['Diabetes Type 2', 'Hypertension', 'CKD Stage 3'],
-      riskScore: 0.78,
-      riskCategory: 'High',
-      laceScore: 12,
-      charlsonIndex: 4,
-      features: {
-        lengthOfStay: 5,
-        emergencyAdmission: true,
-        previousAdmissions: 3,
-        medicationCount: 12,
-        socialRiskFactors: ['Lives alone', 'Limited transportation'],
-        vitalTrends: 'Improving',
-        labTrends: 'Stable'
-      },
-      interventions: ['Discharge planning', 'Home health referral', '48hr follow-up call'],
-      actualOutcome: null // Would be filled after 30 days
-    },
-    {
-      id: 'P002',
-      name: 'Patient B',
-      age: 45,
-      gender: 'Male',
-      admissionDate: '2024-12-18',
-      dischargeDate: '2024-12-19',
-      primaryDiagnosis: 'Pneumonia',
-      comorbidities: ['Asthma'],
-      riskScore: 0.23,
-      riskCategory: 'Low',
-      laceScore: 4,
-      charlsonIndex: 1,
-      features: {
-        lengthOfStay: 1,
-        emergencyAdmission: false,
-        previousAdmissions: 0,
-        medicationCount: 4,
-        socialRiskFactors: [],
-        vitalTrends: 'Normal',
-        labTrends: 'Improving'
-      },
-      interventions: ['Standard discharge'],
-      actualOutcome: null
-    },
-    {
-      id: 'P003',
-      name: 'Patient C',
-      age: 82,
-      gender: 'Female',
-      admissionDate: '2024-12-10',
-      dischargeDate: '2024-12-16',
-      primaryDiagnosis: 'COPD Exacerbation',
-      comorbidities: ['Heart Failure', 'Osteoporosis', 'Depression'],
-      riskScore: 0.85,
-      riskCategory: 'High',
-      laceScore: 15,
-      charlsonIndex: 6,
-      features: {
-        lengthOfStay: 6,
-        emergencyAdmission: true,
-        previousAdmissions: 5,
-        medicationCount: 15,
-        socialRiskFactors: ['Frail', 'Cognitive impairment', 'Polypharmacy'],
-        vitalTrends: 'Concerning',
-        labTrends: 'Variable'
-      },
-      interventions: ['Geriatrics consult', 'Medication reconciliation', 'SNF placement'],
-      actualOutcome: 'Readmitted Day 14' // This would show model performance
+  useEffect(() => {
+    loadSystemData();
+  }, []);
+
+  const loadSystemData = async () => {
+    try {
+      setLoading(true);
+      const [metricsData, patientsData] = await Promise.all([
+        apiService.getSystemMetrics(),
+        apiService.getPatients()
+      ]);
+      
+      setSystemMetrics(metricsData);
+      setPatients(patientsData);
+    } catch (error) {
+      setError('Failed to load system data. Please try again.');
+      console.error('Error loading system data:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const getRiskColor = (category) => {
     switch(category) {
@@ -141,18 +88,32 @@ const ReadmissionPredictionSystem = () => {
   };
 
   const BiasMonitoring = () => {
-    const biasMetrics = [
-      { group: 'Age 65+', precision: 74.2, recall: 71.8, fairness_ratio: 0.96 },
-      { group: 'Age <65', precision: 78.1, recall: 66.2, fairness_ratio: 1.04 },
-      { group: 'Female', precision: 76.8, recall: 69.4, fairness_ratio: 1.01 },
-      { group: 'Male', precision: 75.6, recall: 68.3, fairness_ratio: 0.99 },
-      { group: 'White', precision: 77.2, recall: 70.1, fairness_ratio: 1.02 },
-      { group: 'Black/African American', precision: 74.1, recall: 66.8, fairness_ratio: 0.96 },
-      { group: 'Hispanic/Latino', precision: 75.9, recall: 68.9, fairness_ratio: 0.99 },
-      { group: 'Medicaid', precision: 73.5, recall: 65.2, fairness_ratio: 0.94 },
-      { group: 'Medicare', precision: 76.8, recall: 70.4, fairness_ratio: 1.01 },
-      { group: 'Commercial', precision: 78.9, recall: 69.7, fairness_ratio: 1.05 }
-    ];
+    const [biasData, setBiasData] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      loadBiasData();
+    }, []);
+
+    const loadBiasData = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getBiasMonitoring();
+        setBiasData(data);
+      } catch (error) {
+        console.error('Error loading bias data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (loading) {
+      return (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        </div>
+      );
+    }
 
     return (
       <div className="bg-white rounded-lg shadow p-6">
@@ -177,7 +138,7 @@ const ReadmissionPredictionSystem = () => {
               </tr>
             </thead>
             <tbody>
-              {biasMetrics.map((metric, index) => (
+              {biasData.map((metric, index) => (
                 <tr key={index} className="border-b">
                   <td className="py-2">{metric.group}</td>
                   <td className="py-2">{metric.precision.toFixed(1)}%</td>
@@ -270,7 +231,7 @@ const ReadmissionPredictionSystem = () => {
         <div className="mt-4 p-3 bg-gray-50 rounded">
           <h5 className="font-medium text-sm mb-2">Model Explanation (SHAP values)</h5>
           <div className="text-xs space-y-1">
-            <p>• Previous admissions (+0.24): 3 admissions significantly increase risk</p>
+            <p>• Previous admissions (+0.24): {patient.features.previousAdmissions} admissions significantly increase risk</p>
             <p>• Length of stay (+0.12): {patient.features.lengthOfStay} days above average</p>
             <p>• Age (+0.08): {patient.age} years contributes to higher risk</p>
             <p>• Emergency admission (+0.06): Unplanned admission indicates instability</p>
@@ -280,6 +241,17 @@ const ReadmissionPredictionSystem = () => {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading patient data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -293,17 +265,34 @@ const ReadmissionPredictionSystem = () => {
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <p className="text-sm text-gray-500">Model Version</p>
-                <p className="font-medium">v2.1.3 (Dec 2024)</p>
+                <p className="text-sm text-gray-500">Logged in as</p>
+                <p className="font-medium">{currentUser?.name} ({currentUser?.role})</p>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-gray-500">Last Updated</p>
-                <p className="font-medium">2 hours ago</p>
-              </div>
+              <button
+                onClick={onLogout}
+                className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {error && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="flex">
+              <AlertTriangle className="h-5 w-5 text-red-400" />
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Error</h3>
+                <div className="mt-2 text-sm text-red-700">{error}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -401,7 +390,7 @@ const ReadmissionPredictionSystem = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {samplePatients.map(patient => (
+                    {patients.map(patient => (
                       <tr key={patient.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">{patient.name}</div>
